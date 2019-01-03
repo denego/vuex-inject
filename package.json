@@ -1,0 +1,43 @@
+{
+  "name": "vuex-inject",
+  "description": "Decouple vuex modules from each other.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Denis Pobelov <denis@pobelov.com>",
+  "keywords": [
+    "vue",
+    "vuex",
+    "plugin"
+  ],
+  "homepage": "https://github.com/denego/vuex-inject#readme",
+  "repository": "denego/vuex-inject",
+  "bugs": {
+    "url": "https://github.com/denego/vuex-inject/issues"
+  },
+  "scripts": {
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "jest",
+    "lint": "eslint --no-ignore . .eslintrc.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
+    "eslint": "^5.11.1",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^22.1.2",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "jest": "^23.6.0",
+    "vue": "^2.5.21",
+    "vuex": "^3.0.1"
+  },
+  "peerDependencies": {
+    "vue": "^2.0.0",
+    "vuex": "^2.0.0 || ^3.0.0"
+  }
+}
