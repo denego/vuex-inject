@@ -70,3 +70,6 @@ typings/
 *.njsproj
 *.sln
 *.sw*
+
+# Build
+dist/

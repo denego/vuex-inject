@@ -7,7 +7,7 @@ Decouple [Vuex](http://vuex.vuejs.org/) modules from each other.
 ## Installation
 
 ```bash
-$ npm install https://github.com/denego/vuex-inject.git
+$ npm install vuex-inject
 ```
 
 ## Usage
