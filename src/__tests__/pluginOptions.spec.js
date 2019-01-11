@@ -66,4 +66,16 @@ describe('inject options', () => {
     ]);
   });
 
+  it('should handle edge cases', () => {
+    expect(
+      () => normalizeOptions({ inject: { a: null } })
+    ).not.toThrow();
+    expect(
+      () => normalizeOptions({ modules: { a: {} } })
+    ).not.toThrow();
+    expect(
+      () => normalizeOptions({ inject: { a: null } })
+    ).not.toThrow();
+  });
+
 });
