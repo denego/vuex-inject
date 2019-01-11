@@ -22,7 +22,8 @@
   "scripts": {
     "build": "rimraf dist && microbundle index.js",
     "test": "npm run lint && npm run test:unit",
-    "test:unit": "jest",
+    "test:unit": "jest --coverage",
+    "test:unit:coveralls": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "lint": "eslint --no-ignore src *.js"
   },
   "dependencies": {},
@@ -31,6 +32,7 @@
     "@babel/preset-env": "^7.2.3",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.11.1",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
