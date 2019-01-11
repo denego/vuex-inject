@@ -4,6 +4,10 @@ Decouple [Vuex](http://vuex.vuejs.org/) modules from each other.
 
 <hr />
 
+[![Build Status](https://travis-ci.com/denego/vuex-inject.svg?branch=master)](https://travis-ci.com/denego/vuex-inject)
+[![Coverage Status](https://coveralls.io/repos/github/denego/vuex-inject/badge.svg?branch=master)](https://coveralls.io/github/denego/vuex-inject?branch=master)
+[![NPM version](https://img.shields.io/npm/v/vuex-inject.svg)](https://www.npmjs.com/package/vuex-inject)
+
 ## Installation
 
 ```bash
