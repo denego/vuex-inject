@@ -1,7 +1,7 @@
 {
   "name": "vuex-inject",
   "description": "Decouple vuex modules from each other.",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "author": "Denis Pobelov <denis@pobelov.com>",
   "keywords": [
@@ -29,8 +29,10 @@
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-decorators": "^7.2.3",
     "@babel/preset-env": "^7.2.3",
     "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
     "coveralls": "^3.0.2",
     "eslint": "^5.11.1",

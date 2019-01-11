@@ -3,7 +3,7 @@ export default function createInjectPlugin (options) {
   let modules = opts.modules;
 
   return store => {
-    inject(store, opts);
+    injectAll(store, opts);
 
     Object.keys(modules).forEach(moduleName => {
       store.registerModule(moduleName, modules[moduleName]);
@@ -28,6 +28,8 @@ export function normalizeOptions (options) {
     ...options,
   };
 
+  joinDecoratorInjections(options.modules, res.moduleField);
+
   res.inject = normalizeInjectOption(
     joinInjectOptions(options.inject, options.modules, res.moduleField),
     res.conditionalGetterName,
@@ -38,29 +40,25 @@ export function normalizeOptions (options) {
 
 function normalizeInjectOption (inject, condName) {
   let norm = [];
-  if (typeof inject === 'object') {
-    Object.keys(inject).forEach(module => {
-      norm = norm.concat(
-        normalizeInjectConfig(inject[module], module, condName)
-      );
-    });
-  }
+  Object.keys(inject).forEach(module => {
+    norm = norm.concat(
+      normalizeInjectConfig(inject[module], module, condName)
+    );
+  });
   return norm;
 }
 
 function normalizeInjectConfig (config, module, cond) {
   let injections = [];
-  if (typeof config === 'object') {
-    Object.keys(config).forEach(type => {
-      Object.keys(config[type]).forEach(local => {
-        let dep = config[type][local];
-        if (typeof dep === 'string') {
-          dep = dep.split('/');
-        }
-        injections.push({ module, type, local, dep, cond });
-      });
+  Object.keys(config).forEach(type => {
+    Object.keys(config[type]).forEach(local => {
+      let dep = config[type][local];
+      if (typeof dep === 'string') {
+        dep = dep.split('/');
+      }
+      injections.push({ module, type, local, dep, cond });
     });
-  }
+  });
   return injections;
 }
 
@@ -92,7 +90,7 @@ function joinInjectOptions (optionsInject, modules, moduleField) {
   return inject;
 }
 
-function inject (store, opts) {
+function injectAll (store, opts) {
   opts.inject.forEach(inj => {
     injectByType(inj.type, inj, store, opts.modules);
   });
@@ -227,3 +225,48 @@ function depModuleName (depAsArray) {
 function isGetterExist (getters, name) {
   return Boolean(Object.getOwnPropertyDescriptor(getters, name));
 }
+
+let decoratorInjections = [];
+
+function getModulesFnMap (modules) {
+  let fnMap = new WeakMap();
+  Object.keys(modules || {}).forEach(moduleName => {
+    Object.keys(modules[moduleName]).forEach(type => {
+      Object.keys(modules[moduleName][type] || {}).forEach(fn => {
+        if (typeof modules[moduleName][type][fn] === 'function') {
+          fnMap.set(modules[moduleName][type][fn], [moduleName, type, fn]);
+        }
+      });
+    });
+  });
+  return fnMap;
+}
+
+function joinDecoratorInjections (modules, moduleField) {
+  let fnMap = getModulesFnMap(modules);
+  while (decoratorInjections.length) {
+    let [fn, dep, forceType] = decoratorInjections.shift();
+    let [moduleName, type, name] = fnMap.get(fn) || [];
+    type = forceType || type;
+    if (fn && name) {
+      modules[moduleName][moduleField] = modules[moduleName][moduleField] || {};
+      let conf = modules[moduleName][moduleField];
+      conf[type] = conf[type] || {};
+      conf[type][name] = dep;
+      fnMap.delete(fn);
+    }
+  }
+}
+
+export function legacyDecorator (type, dep) {
+  if (dep === undefined) {
+    dep = type;
+    type = undefined;
+  }
+  return function (target, name, config) {
+    decoratorInjections.push([target[name], dep, type]);
+    return config;
+  };
+}
+
+export const inject = legacyDecorator;

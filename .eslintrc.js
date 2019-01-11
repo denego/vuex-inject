@@ -1,7 +1,10 @@
 module.exports = {
   root: true,
+  parser: "babel-eslint",
   parserOptions: {
-    parser: 'babel-eslint',
+    ecmaFeatures: {
+      legacyDecorators: true
+    }
   },
   env: {
     node: true,
