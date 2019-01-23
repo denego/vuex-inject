@@ -128,7 +128,7 @@ describe('rest', () => {
 
 ## What's inside
 
-The injections is quite simple. When the following module will be passed to
+The injections are quite simple. When the following module will be passed to
 createInjectPlugin:
 ```js
 export default {
@@ -186,7 +186,7 @@ export default {
 
 ## Conditional injection
 
-Conditional injection may help implement dynamic feature toggles. If the module,
+Conditional injections may help implement dynamic feature toggles. If the module,
 we are injecting from, has `isInjectable` (default name) getter and its value is `false`, then
 all the parts injected from that module will return default (original) values,
 until `isInjectable` getter become `true`.
