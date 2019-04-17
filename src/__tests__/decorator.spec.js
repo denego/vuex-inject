@@ -42,4 +42,37 @@ describe('decorator injections', () => {
       } })
     ).not.toThrow();
   });
+
+  it('should support submodules', () => {
+    let opts = normalizeOptions({
+      modules: {
+        main: {
+          getters: {
+            @inject('depModule/version')
+            $version () {},
+            @inject('state', 'depModule/form.key')
+            $stateKey () {},
+          },
+          modules: {
+            submain: {
+              actions: {
+                @inject('depModule/doAct')
+                $doAct () {},
+                @inject('mutations', 'depModule/mutate')
+                $mutate () {},
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(opts.modules.main.inject).toEqual({
+      getters: { $version: 'depModule/version' },
+      state: { $stateKey: 'depModule/form.key' },
+    });
+    expect(opts.modules.main.modules.submain.inject).toEqual({
+      actions: { $doAct: 'depModule/doAct' },
+      mutations: { $mutate: 'depModule/mutate' },
+    });
+  });
 });

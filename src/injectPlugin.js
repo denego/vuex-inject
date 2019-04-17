@@ -30,10 +30,23 @@ export function normalizeOptions (options) {
 
   joinDecoratorInjections(options.modules, res.moduleField);
 
-  res.inject = normalizeInjectOption(
-    joinInjectOptions(options.inject, options.modules, res.moduleField),
-    res.conditionalGetterName,
-  );
+  res.inject = [];
+  (function deep (parents, modules) {
+    if (!modules) {
+      return;
+    }
+    res.inject = res.inject.concat(normalizeInjectOption(
+      joinInjectOptions(
+        options.inject, modules, res.moduleField, parents
+      ),
+      res.conditionalGetterName,
+    ));
+    Object.keys(modules)
+      .filter(moduleName => modules[moduleName].modules)
+      .forEach(moduleName => {
+        deep(parents.concat(moduleName), modules[moduleName].modules);
+      });
+  }([], options.modules));
 
   return res;
 }
@@ -62,7 +75,7 @@ function normalizeInjectConfig (config, module, cond) {
   return injections;
 }
 
-function joinInjectOptions (optionsInject, modules, moduleField) {
+function joinInjectOptions (optionsInject, modules, moduleField, parents) {
   let inject = {};
 
   function addInject (moduleName, type, config) {
@@ -78,13 +91,21 @@ function joinInjectOptions (optionsInject, modules, moduleField) {
   Object.keys(modules || {}).forEach(moduleName => {
     Object.keys(modules[moduleName][moduleField] || {})
       .forEach(type => {
-        addInject(moduleName, type, modules[moduleName][moduleField][type]);
+        addInject(
+          [...parents, moduleName].join('/'),
+          type,
+          modules[moduleName][moduleField][type]
+        );
       });
   });
   Object.keys(optionsInject || {}).forEach(moduleName => {
     Object.keys(optionsInject[moduleName] || {})
       .forEach(type => {
-        addInject(moduleName, type, optionsInject[moduleName][type]);
+        addInject(
+          moduleName,
+          type,
+          optionsInject[moduleName][type]
+        );
       });
   });
   return inject;
@@ -96,8 +117,20 @@ function injectAll (store, opts) {
   });
 }
 
+function getModuleByName (modules, name) {
+  if (!name) {
+    return null;
+  }
+
+  let parts = name.split('/');
+  while (parts.length > 1) {
+    modules = modules[parts.shift()].modules;
+  }
+  return modules[parts.shift()];
+}
+
 function injectByType (type, config, store, modules) {
-  let module = modules[config.module];
+  let module = getModuleByName(modules, config.module);
   if (!module) {
     throw Error(`module not found: ${JSON.stringify(config)}`);
   }
@@ -230,15 +263,22 @@ let decoratorInjections = [];
 
 function getModulesFnMap (modules) {
   let fnMap = new WeakMap();
-  Object.keys(modules || {}).forEach(moduleName => {
-    Object.keys(modules[moduleName]).forEach(type => {
-      Object.keys(modules[moduleName][type] || {}).forEach(fn => {
-        if (typeof modules[moduleName][type][fn] === 'function') {
-          fnMap.set(modules[moduleName][type][fn], [moduleName, type, fn]);
-        }
+
+  (function deep (modules, parent) {
+    Object.keys(modules || {}).forEach(name => {
+      Object.keys(modules[name]).forEach(type => {
+        Object.keys(modules[name][type] || {}).forEach(fn => {
+          if (typeof modules[name][type][fn] === 'function') {
+            fnMap.set(modules[name][type][fn], [parent + name, type, fn]);
+          }
+          if (modules[name].modules) {
+            deep(modules[name].modules, `${name}/`);
+          }
+        });
       });
     });
-  });
+  }(modules, ''));
+
   return fnMap;
 }
 
@@ -247,10 +287,11 @@ function joinDecoratorInjections (modules, moduleField) {
   while (decoratorInjections.length) {
     let [fn, dep, forceType] = decoratorInjections.shift();
     let [moduleName, type, name] = fnMap.get(fn) || [];
+    let module = getModuleByName(modules, moduleName);
     type = forceType || type;
     if (fn && name) {
-      modules[moduleName][moduleField] = modules[moduleName][moduleField] || {};
-      let conf = modules[moduleName][moduleField];
+      module[moduleField] = module[moduleField] || {};
+      let conf = module[moduleField];
       conf[type] = conf[type] || {};
       conf[type][name] = dep;
       fnMap.delete(fn);
